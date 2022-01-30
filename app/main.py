@@ -12,7 +12,7 @@ import pandas as pd
 app=dash.Dash(__name__)
 server = app.server
 
-df= pd.read_excel('kdn.xls',header=0)
+df= pd.read_excel('kdn.xlsx',header=0)
 df = df.set_index('자치구')
 
 #서울시 '구'별 경계선을 그리기 위한 json파일 로딩
