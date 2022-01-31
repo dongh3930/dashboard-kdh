@@ -38,7 +38,28 @@ longitude = 126.982
 trace1 = []
 
 for Type in Types:
-    trace1.append(go.Bar(
+    trace1.append(go.Choroplethmapbox(
+        geojson=geo_str,
+        locations=df['자치구'].tolist(),
+        z=df[Type].tolist(),
+        text=suburbs,
+        featureidkey="properties.name",
+        colorscale=color_deep,
+        colorbar=dict(thickness=20, ticklen=3),
+        zmin=0,
+        zmax=df[Type].max() + 0.7,
+        visible=False,
+        subplot='mapbox1',
+        hovertemplate="<b>%{text}</b><br><br>" +
+                      "value: %{z}<br>" +
+                      "<extra></extra>"))
+
+trace1[0]['visible'] = True
+
+trace2 = []
+
+for Type in Types:
+    trace2.append(go.Bar(
         x=df.sort_values([Type], ascending=True).head(5)[Type],
         y=df.sort_values([Type], ascending=True).head(5)['자치구'].str.title().tolist(),
         xaxis='x2',
@@ -54,27 +75,6 @@ for Type in Types:
         orientation='h',
     ))
 
-trace1[0]['visible'] = True
-
-trace2 = []
-
-for Type in Types:
-    trace2.append(go.Choroplethmapbox(
-        geojson=geo_str,
-        locations=[latitude, longitude],
-        z=df[Type].tolist(),
-        text=suburbs,
-        featureidkey='properties.id',
-        colorscale=color_deep,
-        colorbar=dict(thickness=20, ticklen=3),
-        zmin=0,
-        zmax=df[Type].max() + 0.5,
-        visible=False,
-        subplot='mapbox1',
-        hovertemplate="<b>%{text}</b><br><br>" +
-                      "value: %{z}<br>" +
-                      "<extra></extra>"))
-
 trace2[0]['visible'] = True
 
 layout = go.Layout(
@@ -88,7 +88,7 @@ layout = go.Layout(
         center=dict(lat=latitude, lon=longitude),
         style="open-street-map",
         # accesstoken = mapbox_accesstoken,
-        zoom=11),
+        zoom=9),
 
     xaxis2={
         'zeroline': False,
@@ -138,7 +138,7 @@ layout.update(updatemenus=list([
          ]),)
 ]))
 
-fig = go.Figure(data=trace2 + trace1, layout=layout)
+fig = go.Figure(data=trace1 + trace2, layout=layout)
 
 app=dash.Dash(__name__)
 server = app.server
