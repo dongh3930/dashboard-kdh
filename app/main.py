@@ -9,6 +9,7 @@ from dash import html
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+import numpy as np
 
 df= pd.read_excel('kdn.xlsx',header=0)
 
@@ -109,6 +110,7 @@ layout = go.Layout(
     plot_bgcolor='rgb(204, 204, 204)',
 )
 
+""" 선택 위젯 
 layout.update(updatemenus=list([
     dict(x=0,
          y=1,
@@ -136,23 +138,64 @@ layout.update(updatemenus=list([
                  method='restyle'
              )
          ]),)
-]))
+]))"""
 
 fig = go.Figure(data=trace1 + trace2, layout=layout)
+
+new_df = df.set_index('자치구')
+
+Sucide_rate = new_df['자살율(10만명당)'].values
+old = new_df['독거노인 수'].values
+park = new_df['1인당 도보생활권공원면적'].values
+
+S_old = np.corrcoef(Sucide_rate, old)[0,1]
+S_park = np.corrcoef(Sucide_rate, park)[0,1]
+
+coe_df = pd.DataFrame({
+    "x": ["독거노인 수", "생활권공원면적"],
+    "y": [abs(S_old), abs(S_park)]
+})
+
+fig2 = px.bar(coe_df, x="x", y="y")
 
 app=dash.Dash(__name__)
 server = app.server
 
-app.layout = html.Div(children=[
-    html.H1(children='서울특별시 자치구별 인구당 전력 사용량'),
+app.layout = html.Div([
+    html.Div(children=[
+        html.H1(children='한전KDN 자살률 방지 대시보드',
+                style={"fontSize": "48px"},
+                className="header-title"
+                ),
+        html.P(
+            children="Analyze the "
+                     " Power Consumption & Sucide Rate / in Seoul",
+            className="header-description"
+        ),
 
-    html.Div(children='''
-        Dash:A web application framework for your data.
-    '''),
-    dcc.Graph(
-        id='example-graph',
-        figure=fig
-    )
+        dcc.Graph(
+            id='example-graph-1',
+            figure=fig
+        ),
+
+        html.Div(children='''
+               Data source from https://github.com/dongh3930/dashboard-kdh
+           ''')]),
+
+    html.Div([
+               html.H1(children='자살률 방지를 위한 자살률과의 상관관계',
+                style={"fontSize": "24px"},
+                className="header-title"
+                ),
+
+        dcc.Graph(
+            id='example-graph-2',
+            figure=fig2
+        ),
+
+        html.Div(children='''
+            Data: 도보생활권공원면적 & 독거노인
+        ''')])
 ])
 
 if __name__ =='__main__':
