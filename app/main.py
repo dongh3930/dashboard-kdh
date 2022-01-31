@@ -64,7 +64,7 @@ for Type in Types:
         locations=[latitude, longitude],
         z=df[Type].tolist(),
         text=suburbs,
-        featureidkey='properties.merged',
+        featureidkey='properties.id',
         colorscale=color_deep,
         colorbar=dict(thickness=20, ticklen=3),
         zmin=0,
