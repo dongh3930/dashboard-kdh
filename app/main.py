@@ -152,7 +152,7 @@ old = new_df['독거노인 수'].values
 park = new_df['1인당 도보생활권공원면적'].values
 park_size = new_df['공원면적'].values
 old_facility = new_df['노인시설합계'].values
-
+#상관관계 분석
 S_old = np.corrcoef(Sucide_rate, old)[0,1]
 S_park = np.corrcoef(Sucide_rate, park)[0,1]
 S_park_size = np.corrcoef(Sucide_rate, park_size)[0,1]
@@ -162,9 +162,10 @@ coe_df = pd.DataFrame({
     "x": ["독거노인 수", "생활권공원면적", "공원면적", "노인시설합계"],
     "y": [abs(S_old), abs(S_park), abs(S_park_size), abs(S_old_facility)]
 })
-
-coe_df = coe_df.sort_values(['y'],ascending=False) #정렬
-top2 = coe_df.iloc[:2] #상위 2개 뽑아냄
+#내림차순 정렬
+coe_df = coe_df.sort_values(['y'],ascending=False)
+#상위 2개 뽑아냄
+top2 = coe_df.iloc[:2]
 
 fig2 = px.bar(coe_df, x="x", y="y")
 
@@ -201,15 +202,14 @@ app.layout = html.Div([
             figure=fig2
         ),
         html.Div(children='''
-        Data: 독거노인 수, 생활권공원면적, 공원면적, 노인시설합계
+        Data: 상관관계가 높은 Top 2 Data
         ''')]),
-    html.Div([
-        dash_table.DataTable(
-            id='datatable_id',
-            data = top2.to_dict('record'),
-            columns=[{"name": i, "id": i} for i in top2.columns]
-        )
-        ])
+        html.Div([
+            dash_table.DataTable(
+                id='datatable_id',
+                data = top2.to_dict('record'),
+                columns=[{"name": i, "id": i} for i in top2.columns])
+            ]),
 ])
 
 
