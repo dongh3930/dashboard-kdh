@@ -186,34 +186,20 @@ app.layout = html.Div([
         html.Div(children='''
                Data source from https://github.com/dongh3930/dashboard-kdh
            ''')]),
-
     html.Div([
-        html.Div([
-            html.H1(children='자살 방지를 위한 자살률과 변수 데이터들의 상관관계',
-                    style={"fontSize": "24px"},
-                    className="header-title"
-                    ),
-            dcc.Graph(
-                id='example-graph-2',
-                figure=fig2
-            ),
-            html.Div(children='''
-               Data: 독거노인 수, 생활권공원면적, 공원면적, 노인시설합계
-            ''')]),
-        html.Div([
-            html.H1(children='자살 방지를 위한 자살률과 변수 데이터들의 상관관계',
-                    style={"fontSize": "24px"},
-                    className="header-title"
-                    ),
-            dcc.Graph(
-                id='example-graph-2',
-                figure=fig2
-            ),
-            html.Div(children='''
-               Data: 독거노인 수, 생활권공원면적, 공원면적, 노인시설합계
-            ''')])
-    ])
+        html.H1(children='자살 방지를 위한 자살률과 변수 데이터들의 상관관계',
+                style={"fontSize": "24px"},
+                className="header-title"
+                ),
+        dcc.Graph(
+            id='example-graph-2',
+            figure=fig2
+        ),
+        html.Div(children='''
+            Data: 독거노인 수, 생활권공원면적, 공원면적, 노인시설합계
+        ''')])
 ])
+
 
 if __name__ =='__main__':
     app.run_server(debug=False)
