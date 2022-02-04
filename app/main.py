@@ -1,4 +1,6 @@
 import json
+
+import dash_table
 import folium
 import matplotlib.pyplot as plt
 import dash
@@ -161,6 +163,9 @@ coe_df = pd.DataFrame({
     "y": [abs(S_old), abs(S_park), abs(S_park_size), abs(S_old_facility)]
 })
 
+coe_df = coe_df.sort_values(['y'],ascending=False) #정렬
+top2 = coe_df.iloc[:2] #상위 2개 뽑아냄
+
 fig2 = px.bar(coe_df, x="x", y="y")
 
 app=dash.Dash(__name__)
@@ -196,8 +201,15 @@ app.layout = html.Div([
             figure=fig2
         ),
         html.Div(children='''
-            Data: 독거노인 수, 생활권공원면적, 공원면적, 노인시설합계
-        ''')])
+        Data: 독거노인 수, 생활권공원면적, 공원면적, 노인시설합계
+        ''')]),
+    html.Div([
+        dash_table.DataTable(
+            id='datatable_id',
+            data = top2.to_dict('record'),
+            columns=[{"name": i, "id": i} for i in top2.columns]
+        )
+        ])
 ])
 
 
