@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 
-df= pd.read_excel('kdn.xlsx',header=0)
+df= pd.read_excel('kdn_data.xlsx',header=0)
 
 #서울시 '구'별 경계선을 그리기 위한 json파일 로딩
 geo_path = '02. skorea_municipalities_geo_simple.json'
@@ -79,7 +79,7 @@ for Type in Types:
 trace2[0]['visible'] = True
 
 layout = go.Layout(
-    title={'text': '서울특별시 자치구별 데이터 분포 / Local extinction in 2020',
+    title={'text': '서울특별시 자치구별 전력사용량(인당)',
            'font': {'size': 28,
                     'family': 'Arial'}},
     autosize=True,
@@ -145,15 +145,20 @@ fig = go.Figure(data=trace1 + trace2, layout=layout)
 new_df = df.set_index('자치구')
 
 Sucide_rate = new_df['자살율(10만명당)'].values
+
 old = new_df['독거노인 수'].values
 park = new_df['1인당 도보생활권공원면적'].values
+park_size = new_df['공원면적'].values
+old_facility = new_df['노인시설합계'].values
 
 S_old = np.corrcoef(Sucide_rate, old)[0,1]
 S_park = np.corrcoef(Sucide_rate, park)[0,1]
+S_park_size = np.corrcoef(Sucide_rate, park_size)[0,1]
+S_old_facility = np.corrcoef(Sucide_rate, old_facility)[0,1]
 
 coe_df = pd.DataFrame({
-    "x": ["독거노인 수", "생활권공원면적"],
-    "y": [abs(S_old), abs(S_park)]
+    "x": ["독거노인 수", "생활권공원면적", "공원면적", "노인시설합계"],
+    "y": [abs(S_old), abs(S_park), abs(S_park_size), abs(S_old_facility)]
 })
 
 fig2 = px.bar(coe_df, x="x", y="y")
@@ -163,13 +168,13 @@ server = app.server
 
 app.layout = html.Div([
     html.Div(children=[
-        html.H1(children='한전KDN 자살률 방지 대시보드',
+        html.H1(children='한전KDN 자살 예방 대시보드',
                 style={"fontSize": "48px"},
                 className="header-title"
                 ),
         html.P(
             children="Analyze the "
-                     " Power Consumption & Sucide Rate / in Seoul",
+                     " Power Consumption & Sucide Rate  in Seoul",
             className="header-description"
         ),
 
@@ -183,19 +188,31 @@ app.layout = html.Div([
            ''')]),
 
     html.Div([
-               html.H1(children='자살률 방지를 위한 자살률과의 상관관계',
-                style={"fontSize": "24px"},
-                className="header-title"
-                ),
-
-        dcc.Graph(
-            id='example-graph-2',
-            figure=fig2
-        ),
-
-        html.Div(children='''
-            Data: 도보생활권공원면적 & 독거노인
-        ''')])
+        html.Div([
+            html.H1(children='자살 방지를 위한 자살률과 변수 데이터들의 상관관계',
+                    style={"fontSize": "24px"},
+                    className="header-title"
+                    ),
+            dcc.Graph(
+                id='example-graph-2',
+                figure=fig2
+            ),
+            html.Div(children='''
+               Data: 독거노인 수, 생활권공원면적, 공원면적, 노인시설합계
+            ''')]),
+        html.Div([
+            html.H1(children='자살 방지를 위한 자살률과 변수 데이터들의 상관관계',
+                    style={"fontSize": "24px"},
+                    className="header-title"
+                    ),
+            dcc.Graph(
+                id='example-graph-2',
+                figure=fig2
+            ),
+            html.Div(children='''
+               Data: 독거노인 수, 생활권공원면적, 공원면적, 노인시설합계
+            ''')])
+    ])
 ])
 
 if __name__ =='__main__':
