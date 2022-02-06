@@ -177,14 +177,14 @@ S_park_size_coef = results_parksize.params[1]
 S_facility_coef = results_facility.params[1]
 
 coe_df = pd.DataFrame({
-    'x': ["독거노인 수", "1인당 도보생활권공원면적(㎡)", "공원면적", "노인시설합계"],
-    'y': [S_old_pvalue, S_park_pvalue, S_park_size_pvalue, S_facility_pvalue],
-    'z': [S_old_coef, S_park_coef, S_park_size_coef, S_facility_coef],
-    'o': [abs(S_old_coef), abs(S_park_coef), abs(S_park_size_coef), abs(S_facility_coef)]
+    'variable': ["독거노인 수", "1인당 도보생활권공원면적(㎡)", "공원면적", "노인시설합계"],
+    'P-value': [S_old_pvalue, S_park_pvalue, S_park_size_pvalue, S_facility_pvalue],
+    'Coef': [S_old_coef, S_park_coef, S_park_size_coef, S_facility_coef],
+    'x': [abs(S_old_coef), abs(S_park_coef), abs(S_park_size_coef), abs(S_facility_coef)]
 })
 #오름차순/내림차순 정렬
-coe_df = coe_df.sort_values(['y','o'],ascending=[True, False])
-coe_df = coe_df[['x','y','z']]
+coe_df = coe_df.sort_values(['P-value','x'],ascending=[True, False])
+coe_df = coe_df[['variable','P-value','Coef']]
 
 #fig2 = px.bar(coe_df, x="x", y="y", title="회귀모형 P-Value")
 
