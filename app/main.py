@@ -160,27 +160,33 @@ park_size = park_size.reshape(-1,1)
 facility = facility.reshape(-1,1)
 
 #회귀 분석
-results_old = sm.OLS(old, sm.add_constant(Sucide_rate)).fit()
-results_park = sm.OLS(park, sm.add_constant(Sucide_rate)).fit()
-results_parksize = sm.OLS(park_size, sm.add_constant(Sucide_rate)).fit()
-results_facility = sm.OLS(facility, sm.add_constant(Sucide_rate)).fit()
+results_old = sm.OLS(Sucide_rate, sm.add_constant(old)).fit()
+results_park = sm.OLS(Sucide_rate, sm.add_constant(park)).fit()
+results_parksize = sm.OLS(Sucide_rate, sm.add_constant(park_size)).fit()
+results_facility = sm.OLS(Sucide_rate, sm.add_constant(facility)).fit()
 
 #회귀모형의 p-value
-S_old = results_old.f_pvalue
-S_park = results_park.f_pvalue
-S_park_size = results_parksize.f_pvalue
-S_facility = results_facility.f_pvalue
+S_old_pvalue = results_old.f_pvalue
+S_park_pvalue = results_park.f_pvalue
+S_park_size_pvalue = results_parksize.f_pvalue
+S_facility_pvalue = results_facility.f_pvalue
+#회귀모형의 기울기 (회귀계수)
+S_old_coef = results_old.params[1]
+S_park_coef = results_park.params[1]
+S_park_size_coef = results_parksize.params[1]
+S_facility_coef = results_facility.params[1]
 
 coe_df = pd.DataFrame({
     'x': ["독거노인 수", "1인당 도보생활권공원면적(㎡)", "공원면적", "노인시설합계"],
-    'y': [S_old, S_park, S_park_size, S_facility]
+    'y': [S_old_pvalue, S_park_pvalue, S_park_size_pvalue, S_facility_pvalue],
+    'z': [S_old_coef, S_park_coef, S_park_size_coef, S_facility_coef],
+    'o': [abs(S_old_coef), abs(S_park_coef), abs(S_park_size_coef), abs(S_facility_coef)]
 })
-#오름차순 정렬
-coe_df = coe_df.sort_values(['y'],ascending=True)
-#상위 2개 뽑아냄
-top2 = coe_df.iloc[:2]
+#오름차순/내림차순 정렬
+coe_df = coe_df.sort_values(['y','o'],ascending=[True, False])
+coe_df = coe_df[['x','y','z']]
 
-fig2 = px.bar(coe_df, x="x", y="y", title="회귀모형 P-Value")
+#fig2 = px.bar(coe_df, x="x", y="y", title="회귀모형 P-Value")
 
 app=dash.Dash(__name__)
 server = app.server
@@ -206,22 +212,22 @@ app.layout = html.Div([
                Data source from https://github.com/dongh3930/dashboard-kdh
            ''')]),
     html.Div([
-        html.H1(children='자살률과 변수 데이터들의 회귀분석 결과(P-Value)',
+        html.H1(children='자살률과 변수 데이터들의 회귀분석 결과',
                 style={"fontSize": "20px"},
                 className="header-title"
                 ),
-        dcc.Graph(
-            id='example-graph-2',
-            figure=fig2
-        ),
+#        dcc.Graph(
+#            id='example-graph-2',
+#            figure=fig2
+#        ),
         html.Div(children='''
-        유의미한 인과관계를 보이는 Top 2 Data (P-Value < 0.05)
+        P-Value & 회귀계수
         ''')]),
         html.Div([
             dash_table.DataTable(
                 id='datatable_id',
-                data = top2.to_dict('record'),
-                columns=[{"name": i, "id": i} for i in top2.columns])
+                data = coe_df.to_dict('record'),
+                columns=[{"name": i, "id": i} for i in coe_df.columns])
             ]),
 ])
 
