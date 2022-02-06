@@ -1,5 +1,5 @@
 import json
-
+import statsmodels.api as sm
 import dash_table
 import folium
 import matplotlib.pyplot as plt
@@ -144,30 +144,44 @@ layout.update(updatemenus=list([
 
 fig = go.Figure(data=trace1 + trace2, layout=layout)
 
-new_df = df.set_index('자치구')
+df2= pd.read_excel('kdn_data2.xlsx',header=0)
+new_df = df2.set_index('자치구')
 
-Sucide_rate = new_df['자살율(10만명당)'].values
+Sucide_rate = new_df['자살률(10만명당)'].values
 
 old = new_df['독거노인 수'].values
-park = new_df['1인당 도보생활권공원면적'].values
+park = new_df['1인당 도보생활권공원면적(㎡)'].values
 park_size = new_df['공원면적'].values
-old_facility = new_df['노인시설합계'].values
-#상관관계 분석
-S_old = np.corrcoef(Sucide_rate, old)[0,1]
-S_park = np.corrcoef(Sucide_rate, park)[0,1]
-S_park_size = np.corrcoef(Sucide_rate, park_size)[0,1]
-S_old_facility = np.corrcoef(Sucide_rate, old_facility)[0,1]
+facility = new_df['복지시설 수'].values
+
+Sucide_rate = Sucide_rate.reshape(-1,1)
+old = old.reshape(-1,1)
+park = park.reshape(-1,1)
+park_size = park_size.reshape(-1,1)
+facility = facility.reshape(-1,1)
+
+#회귀 분석
+results_old = sm.OLS(old, sm.add_constant(Sucide_rate)).fit()
+results_park = sm.OLS(park, sm.add_constant(Sucide_rate)).fit()
+results_parksize = sm.OLS(park_size, sm.add_constant(Sucide_rate)).fit()
+results_facility = sm.OLS(facility, sm.add_constant(Sucide_rate)).fit()
+
+#회귀모형의 p-value
+S_old = results_old.f_pvalue
+S_park = results_park.f_pvalue
+S_park_size = results_parksize.f_pvalue
+S_facility = results_facility.f_pvalue
 
 coe_df = pd.DataFrame({
-    "x": ["독거노인 수", "생활권공원면적", "공원면적", "노인시설합계"],
-    "y": [abs(S_old), abs(S_park), abs(S_park_size), abs(S_old_facility)]
+    'x': ["독거노인 수", "1인당 도보생활권공원면적(㎡)", "공원면적", "복지시설 수"],
+    'y': [S_old, S_park, S_park_size, S_facility]
 })
-#내림차순 정렬
-coe_df = coe_df.sort_values(['y'],ascending=False)
+#오름차순 정렬
+coe_df = coe_df.sort_values(['y'],ascending=True)
 #상위 2개 뽑아냄
 top2 = coe_df.iloc[:2]
 
-fig2 = px.bar(coe_df, x="x", y="y")
+fig2 = px.bar(coe_df, x="x", y="y", title="회귀모형 P-Value")
 
 app=dash.Dash(__name__)
 server = app.server
@@ -193,8 +207,8 @@ app.layout = html.Div([
                Data source from https://github.com/dongh3930/dashboard-kdh
            ''')]),
     html.Div([
-        html.H1(children='자살 방지를 위한 자살률과 변수 데이터들의 상관관계',
-                style={"fontSize": "24px"},
+        html.H1(children='자살률과 변수 데이터들의 회귀분석 결과(P-Value)',
+                style={"fontSize": "20px"},
                 className="header-title"
                 ),
         dcc.Graph(
@@ -202,7 +216,7 @@ app.layout = html.Div([
             figure=fig2
         ),
         html.Div(children='''
-        Data: 상관관계가 높은 Top 2 Data
+        유의미한 상관관계가 있는 Top 2 Data (P-Value < 0.05)
         ''')]),
         html.Div([
             dash_table.DataTable(
