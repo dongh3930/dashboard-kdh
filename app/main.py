@@ -166,15 +166,15 @@ results_parksize = sm.OLS(Sucide_rate, sm.add_constant(park_size)).fit()
 results_facility = sm.OLS(Sucide_rate, sm.add_constant(facility)).fit()
 
 #회귀모형의 p-value
-S_old_pvalue = results_old.f_pvalue
-S_park_pvalue = results_park.f_pvalue
-S_park_size_pvalue = results_parksize.f_pvalue
-S_facility_pvalue = results_facility.f_pvalue
+S_old_pvalue = round(results_old.f_pvalue, 10)
+S_park_pvalue = round(results_park.f_pvalue, 10)
+S_park_size_pvalue = round(results_parksize.f_pvalue, 10)
+S_facility_pvalue = round(results_facility.f_pvalue, 10)
 #회귀모형의 기울기 (회귀계수)
-S_old_coef = results_old.params[1]
-S_park_coef = results_park.params[1]
-S_park_size_coef = results_parksize.params[1]
-S_facility_coef = results_facility.params[1]
+S_old_coef = round(results_old.params[1], 10)
+S_park_coef = round(results_park.params[1], 10)
+S_park_size_coef = round(results_parksize.params[1], 10)
+S_facility_coef = round(results_facility.params[1], 10)
 
 coe_df = pd.DataFrame({
     'variable': ["독거노인 수", "1인당 도보생활권공원면적(㎡)", "공원면적", "노인시설합계"],
